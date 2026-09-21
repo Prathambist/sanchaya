@@ -12,6 +12,7 @@ import {
 import {
     useCurrency,
 } from "../context/CurrencyContext";
+import { useToast } from "../context/ToastContext";
 
 
 const monthNames = [
@@ -36,6 +37,8 @@ function Budgets() {
         convertFromBase,
         convertToBase,
     } = useCurrency();
+
+    const toast = useToast();
 
 
     const today = new Date();
@@ -300,11 +303,15 @@ function Budgets() {
                 }
 
 
+                toast.success(
+                    editingBudget
+                        ? "Budget updated."
+                        : "Budget created."
+                );
+
                 closeModal();
                 await loadBudgets();
             } catch (error) {
-                console.error(error);
-
                 setError(
                     error.message ||
                         "Unable to save budget."
@@ -336,13 +343,17 @@ function Budgets() {
 
                 setDeleteTarget(null);
                 await loadBudgets();
-            } catch (error) {
-                console.error(error);
 
-                setError(
-                    error.message ||
-                        "Unable to delete budget."
+                toast.success(
+                    "Budget deleted."
                 );
+            } catch (error) {
+                const message =
+                    error.message ||
+                    "Unable to delete budget.";
+
+                setError(message);
+                toast.error(message);
             } finally {
                 setDeleting(false);
             }
@@ -764,9 +775,9 @@ function Budgets() {
             {/* Add / Edit modal */}
 
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-[2px] sm:items-center sm:px-4">
 
-                    <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                    <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl sm:rounded-xl">
 
                         <div>
 
@@ -864,6 +875,7 @@ function Budgets() {
                                 <input
                                     id="budget-amount"
                                     type="number"
+                                    inputMode="decimal"
                                     min="0.01"
                                     step="0.01"
                                     value={
@@ -932,7 +944,7 @@ function Budgets() {
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
 
-                    <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+                    <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
 
                         <h2 className="text-lg font-semibold text-neutral-900">
                             Delete budget?

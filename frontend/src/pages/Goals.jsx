@@ -15,6 +15,7 @@ import { apiFetch } from "../lib/api";
 import {
     useCurrency,
 } from "../context/CurrencyContext";
+import { useToast } from "../context/ToastContext";
 
 
 function Goals() {
@@ -23,6 +24,8 @@ function Goals() {
         convertFromBase,
         convertToBase,
     } = useCurrency();
+
+    const toast = useToast();
 
 
     const [goals, setGoals] =
@@ -506,6 +509,12 @@ function Goals() {
                 }
 
 
+                toast.success(
+                    editingGoal
+                        ? "Goal updated."
+                        : "Goal created."
+                );
+
                 setShowForm(
                     false
                 );
@@ -513,8 +522,6 @@ function Goals() {
                 resetForm();
 
             } catch (error) {
-                console.error(error);
-
                 setError(
                     error.message ||
                         "Unable to save goal."
@@ -638,11 +645,15 @@ function Goals() {
                         },
                         150
                     );
+                } else {
+                    // The celebration modal is feedback enough when the
+                    // goal just completed; only toast otherwise.
+                    toast.success(
+                        "Contribution added."
+                    );
                 }
 
             } catch (error) {
-                console.error(error);
-
                 setContributionError(
                     error.message ||
                         "Unable to add money to this goal."
@@ -691,13 +702,17 @@ function Goals() {
                     null
                 );
 
-            } catch (error) {
-                console.error(error);
-
-                setError(
-                    error.message ||
-                        "Unable to delete goal."
+                toast.success(
+                    "Goal deleted."
                 );
+
+            } catch (error) {
+                const message =
+                    error.message ||
+                    "Unable to delete goal.";
+
+                setError(message);
+                toast.error(message);
             } finally {
                 setDeleting(false);
             }
@@ -1256,9 +1271,9 @@ function Goals() {
             {/* Add / Edit goal */}
 
             {showForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-[2px] sm:items-center sm:px-4">
 
-                    <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+                    <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:rounded-xl">
 
                         <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
 
@@ -1355,6 +1370,7 @@ function Goals() {
                                     <input
                                         id="targetAmount"
                                         type="number"
+                                        inputMode="decimal"
                                         min="0"
                                         step="0.01"
                                         value={
@@ -1389,6 +1405,7 @@ function Goals() {
                                     <input
                                         id="currentAmount"
                                         type="number"
+                                        inputMode="decimal"
                                         min="0"
                                         step="0.01"
                                         value={
@@ -1495,9 +1512,9 @@ function Goals() {
 
             {showContributionForm &&
                 contributionGoal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-[2px] sm:items-center sm:px-4">
 
-                        <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+                        <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:rounded-xl">
 
                             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
 
@@ -1605,6 +1622,7 @@ function Goals() {
                                     <input
                                         id="contributionAmount"
                                         type="number"
+                                        inputMode="decimal"
                                         min="0"
                                         step="0.01"
                                         max={convertFromBase(
@@ -1797,7 +1815,7 @@ function Goals() {
             {goalToDelete && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
 
-                    <div className="w-full max-w-sm rounded-xl bg-white shadow-xl">
+                    <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-xl bg-white shadow-xl">
 
                         <div className="p-5">
 

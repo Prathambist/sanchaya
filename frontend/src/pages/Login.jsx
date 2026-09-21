@@ -9,14 +9,41 @@ function Login({ onSignup }) {
     const [rememberMe, setRememberMe] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [resetSent, setResetSent] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
+
+const handleForgotPassword = async () => {
+    if (!email) {
+        setError("Enter your email above first, then tap “Forgot password?”.");
+        return;
+    }
+
+    setError("");
+    setResetLoading(true);
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+        if (error) {
+            setError(error.message);
+        } else {
+            setResetSent(true);
+        }
+    } catch (error) {
+        setError(
+            error.message ||
+                "Something went wrong. Please try again."
+        );
+    } finally {
+        setResetLoading(false);
+    }
+};
 
 const handleLogin = async (event) => {
     event.preventDefault();
 
     setError("");
     setLoading(true);
-
-    console.log("Starting login...");
 
     try {
         const loginPromise = supabase.auth.signInWithPassword({
@@ -34,15 +61,10 @@ const handleLogin = async (event) => {
             }, 10000);
         });
 
-        const { data, error } = await Promise.race([
+        const { error } = await Promise.race([
             loginPromise,
             timeoutPromise,
         ]);
-
-        console.log("Login response:", {
-            data,
-            error,
-        });
 
         if (error) {
             if (
@@ -107,12 +129,15 @@ const handleLogin = async (event) => {
                             <input
                                 id="email"
                                 type="email"
+                                inputMode="email"
                                 value={email}
-                                onChange={(event) =>
-                                    setEmail(event.target.value)
-                                }
+                                onChange={(event) => {
+                                    setEmail(event.target.value);
+                                    setResetSent(false);
+                                }}
                                 placeholder="you@example.com"
                                 autoComplete="email"
+                                autoFocus
                                 required
                                 className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-500 focus:ring-3 focus:ring-neutral-900/5"
                             />
@@ -129,11 +154,21 @@ const handleLogin = async (event) => {
 
                                 <button
                                     type="button"
-                                    className="text-xs text-neutral-500 transition hover:text-neutral-900"
+                                    onClick={handleForgotPassword}
+                                    disabled={resetLoading}
+                                    className="text-xs text-neutral-500 transition hover:text-neutral-900 disabled:opacity-60"
                                 >
-                                    Forgot password?
+                                    {resetLoading
+                                        ? "Sending…"
+                                        : "Forgot password?"}
                                 </button>
                             </div>
+
+                            {resetSent && (
+                                <p className="mb-1.5 text-xs text-emerald-600">
+                                    Check your inbox for a password reset link.
+                                </p>
+                            )}
 
                             <div className="relative">
                                 <input

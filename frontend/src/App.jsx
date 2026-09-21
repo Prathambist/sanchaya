@@ -3,10 +3,14 @@ import {
     BrowserRouter,
     Routes,
     Route,
+    Navigate,
 } from "react-router-dom";
-import { MotionConfig } from "framer-motion";
+import { MotionConfig, motion } from "framer-motion";
 
 import { supabase } from "./lib/supabase";
+
+import { ToastProvider } from "./context/ToastContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -18,6 +22,40 @@ import Budgets from "./pages/Budgets";
 import Goals from "./pages/Goals";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+
+
+/*
+ * Shown while the Supabase session resolves — i.e. the very first thing
+ * a user sees on every cold load, so it carries the brand rather than
+ * unstyled "Loading..." text.
+ */
+function AppLoading() {
+    return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-[#f7f7f5]">
+
+            <motion.div
+                animate={{
+                    scale: [1, 1.08, 1],
+                    opacity: [0.85, 1, 0.85],
+                }}
+                transition={{
+                    duration: 1.4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                }}
+                className="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-base font-semibold text-white"
+            >
+                S
+            </motion.div>
+
+
+            <p className="mt-4 text-sm text-neutral-400">
+                Loading your workspace…
+            </p>
+
+        </div>
+    );
+}
 
 
 function App() {
@@ -67,100 +105,112 @@ function App() {
     }, []);
 
 
-    if (loading) {
-        return (
-            <div className="app-loading">
-                Loading...
-            </div>
-        );
-    }
+    const content =
+        loading
+            ? <AppLoading />
+            : session
+              ? <AuthenticatedApp />
+              : showSignup
+                ? (
+                    <Signup
+                        onLogin={() =>
+                            setShowSignup(false)
+                        }
+                    />
+                )
+                : (
+                    <Login
+                        onSignup={() =>
+                            setShowSignup(true)
+                        }
+                    />
+                );
 
 
-    if (!session) {
-        if (showSignup) {
-            return (
-                <Signup
-                    onLogin={() =>
-                        setShowSignup(false)
-                    }
-                />
-            );
-        }
+    return (
+        <ErrorBoundary>
 
+            <MotionConfig reducedMotion="user">
 
-        return (
-            <Login
-                onSignup={() =>
-                    setShowSignup(true)
-                }
-            />
-        );
-    }
+                <ToastProvider>
+                    {content}
+                </ToastProvider>
 
+            </MotionConfig>
 
-    return <AuthenticatedApp />;
+        </ErrorBoundary>
+    );
 }
 
 
 function AuthenticatedApp() {
     return (
-        <MotionConfig reducedMotion="user">
+        <BrowserRouter>
 
-            <BrowserRouter>
+            <Routes>
 
-                <Routes>
+                <Route element={<AppLayout />}>
 
-                    <Route element={<AppLayout />}>
+                    <Route
+                        path="/"
+                        element={
+                            <Dashboard />
+                        }
+                    />
 
-                        <Route
-                            path="/"
-                            element={
-                                <Dashboard />
-                            }
-                        />
+                    <Route
+                        path="/transactions"
+                        element={
+                            <Transactions />
+                        }
+                    />
 
-                        <Route
-                            path="/transactions"
-                            element={
-                                <Transactions />
-                            }
-                        />
+                    <Route
+                        path="/budgets"
+                        element={
+                            <Budgets />
+                        }
+                    />
 
-                        <Route
-                            path="/budgets"
-                            element={
-                                <Budgets />
-                            }
-                        />
+                    <Route
+                        path="/goals"
+                        element={
+                            <Goals />
+                        }
+                    />
 
-                        <Route
-                            path="/goals"
-                            element={
-                                <Goals />
-                            }
-                        />
+                    <Route
+                        path="/analytics"
+                        element={
+                            <Analytics />
+                        }
+                    />
 
-                        <Route
-                            path="/analytics"
-                            element={
-                                <Analytics />
-                            }
-                        />
+                    <Route
+                        path="/settings"
+                        element={
+                            <Settings />
+                        }
+                    />
 
-                        <Route
-                            path="/settings"
-                            element={
-                                <Settings />
-                            }
-                        />
 
-                    </Route>
+                    {/* Unknown paths fall back to the dashboard
+                        instead of rendering a blank page. */}
+                    <Route
+                        path="*"
+                        element={
+                            <Navigate
+                                to="/"
+                                replace
+                            />
+                        }
+                    />
 
-                </Routes>
+                </Route>
 
-            </BrowserRouter>
+            </Routes>
 
-        </MotionConfig>
+        </BrowserRouter>
     );
 }
 

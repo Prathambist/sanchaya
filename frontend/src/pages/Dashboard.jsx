@@ -523,7 +523,13 @@ function Dashboard() {
 
                                                         {/* Income */}
 
-                                                        <div className="group relative flex h-full flex-1 items-end justify-center">
+                                                        <button
+                                                            type="button"
+                                                            aria-label={`${item.label} income: ${formatCurrency(
+                                                                item.income
+                                                            )}`}
+                                                            className="group relative flex h-full flex-1 items-end justify-center outline-none"
+                                                        >
 
                                                             <div
                                                                 className="w-full rounded-t-md bg-emerald-500/80 transition hover:bg-emerald-500"
@@ -534,7 +540,7 @@ function Dashboard() {
 
                                                                 {item.income >
                                                                     0 && (
-                                                                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-sm transition group-hover:opacity-100">
+                                                                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-sm transition group-hover:opacity-100 group-focus:opacity-100">
                                                                         Income:{" "}
                                                                         {formatCurrency(
                                                                             item.income
@@ -544,12 +550,18 @@ function Dashboard() {
 
                                                             </div>
 
-                                                        </div>
+                                                        </button>
 
 
                                                         {/* Expenses */}
 
-                                                        <div className="group relative flex h-full flex-1 items-end justify-center">
+                                                        <button
+                                                            type="button"
+                                                            aria-label={`${item.label} expenses: ${formatCurrency(
+                                                                item.expenses
+                                                            )}`}
+                                                            className="group relative flex h-full flex-1 items-end justify-center outline-none"
+                                                        >
 
                                                             <div
                                                                 className="w-full rounded-t-md bg-red-500/80 transition hover:bg-red-500"
@@ -560,7 +572,7 @@ function Dashboard() {
 
                                                                 {item.expenses >
                                                                     0 && (
-                                                                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-sm transition group-hover:opacity-100">
+                                                                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-sm transition group-hover:opacity-100 group-focus:opacity-100">
                                                                         Expenses:{" "}
                                                                         {formatCurrency(
                                                                             item.expenses
@@ -570,7 +582,7 @@ function Dashboard() {
 
                                                             </div>
 
-                                                        </div>
+                                                        </button>
 
                                                     </div>
 

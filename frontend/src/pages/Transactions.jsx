@@ -15,6 +15,7 @@ import {
 import {
     useCurrency,
 } from "../context/CurrencyContext";
+import { useToast } from "../context/ToastContext";
 
 
 function Transactions() {
@@ -25,6 +26,8 @@ function Transactions() {
         convertFromBase,
         convertToBase,
     } = useCurrency();
+
+    const toast = useToast();
 
 
     const [transactions, setTransactions] =
@@ -79,6 +82,11 @@ function Transactions() {
     const [error, setError] =
         useState("");
 
+    // Kept separate from `error`, which belongs to the add/edit form —
+    // a failed initial load has to surface on the page itself.
+    const [loadError, setLoadError] =
+        useState("");
+
     const [search, setSearch] =
         useState("");
 
@@ -90,6 +98,8 @@ function Transactions() {
                     true
                 );
 
+                setLoadError("");
+
                 const data =
                     await apiFetch(
                         "/api/transactions/"
@@ -99,9 +109,7 @@ function Transactions() {
                     data.transactions || []
                 );
             } catch (error) {
-                console.error(error);
-
-                setError(
+                setLoadError(
                     error.message ||
                         "Unable to load transactions."
                 );
@@ -340,11 +348,15 @@ function Transactions() {
                 }
 
 
+                toast.success(
+                    editingTransaction
+                        ? "Transaction updated."
+                        : "Transaction added."
+                );
+
                 setShowForm(false);
                 resetForm();
             } catch (error) {
-                console.error(error);
-
                 setError(
                     error.message ||
                         `Unable to ${
@@ -395,13 +407,17 @@ function Transactions() {
                 setTransactionToDelete(
                     null
                 );
-            } catch (error) {
-                console.error(error);
 
-                setError(
-                    error.message ||
-                        "Unable to delete transaction."
+                toast.success(
+                    "Transaction deleted."
                 );
+            } catch (error) {
+                const message =
+                    error.message ||
+                    "Unable to delete transaction.";
+
+                setError(message);
+                toast.error(message);
             } finally {
                 setDeleting(false);
             }
@@ -592,6 +608,32 @@ function Transactions() {
                         <p className="text-sm text-neutral-400">
                             Loading transactions...
                         </p>
+
+                    </div>
+                ) : loadError ? (
+                    <div className="flex min-h-64 items-center justify-center px-6">
+
+                        <div className="text-center">
+
+                            <p className="text-base font-medium text-neutral-700">
+                                Unable to load transactions
+                            </p>
+
+                            <p className="mt-2 text-sm text-neutral-400">
+                                {loadError}
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={
+                                    loadTransactions
+                                }
+                                className="mt-4 rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+                            >
+                                Try again
+                            </button>
+
+                        </div>
 
                     </div>
                 ) : filteredTransactions.length ===
@@ -1006,6 +1048,7 @@ function Transactions() {
                                     <input
                                         id="amount"
                                         type="number"
+                                        inputMode="decimal"
                                         min="0.01"
                                         step="0.01"
                                         value={amount}

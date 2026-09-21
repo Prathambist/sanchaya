@@ -542,9 +542,17 @@ function Analytics() {
                                                 );
 
                                             return (
-                                                <div
+                                                <button
+                                                    type="button"
                                                     key={month.month}
-                                                    className="group flex h-full min-w-0 flex-1 items-end justify-center gap-1"
+                                                    aria-label={`${formatMonth(
+                                                        month.month
+                                                    )} — income ${formatCurrency(
+                                                        income
+                                                    )}, expenses ${formatCurrency(
+                                                        expenses
+                                                    )}`}
+                                                    className="group flex h-full min-w-0 flex-1 items-end justify-center gap-1 outline-none"
                                                 >
 
                                                     <div className="relative flex h-full w-2.5 max-w-4 items-end sm:w-4">
@@ -556,7 +564,7 @@ function Analytics() {
                                                             }}
                                                         >
 
-                                                            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white group-hover:block">
+                                                            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white group-hover:block group-focus:block">
                                                                 Income:{" "}
                                                                 {formatCurrency(
                                                                     income
@@ -577,7 +585,7 @@ function Analytics() {
                                                             }}
                                                         >
 
-                                                            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white group-hover:block">
+                                                            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white group-hover:block group-focus:block">
                                                                 Expenses:{" "}
                                                                 {formatCurrency(
                                                                     expenses
@@ -588,7 +596,7 @@ function Analytics() {
 
                                                     </div>
 
-                                                </div>
+                                                </button>
                                             );
                                         }
                                     )}
@@ -841,7 +849,7 @@ function Analytics() {
                         <div className="flex flex-col items-center justify-center">
 
                             <div
-                                className="relative h-64 w-64 rounded-full"
+                                className="relative h-48 w-48 rounded-full sm:h-64 sm:w-64"
                                 style={{
                                     background: (() => {
                                         let current = 0;
@@ -885,13 +893,13 @@ function Analytics() {
                                 }}
                             >
 
-                                <div className="absolute inset-10 flex flex-col items-center justify-center rounded-full bg-white">
+                                <div className="absolute inset-7 flex flex-col items-center justify-center rounded-full bg-white px-2 sm:inset-10">
 
                                     <span className="text-xs font-medium text-gray-500">
                                         Total spent
                                     </span>
 
-                                    <span className="mt-2 text-xl font-semibold text-gray-900">
+                                    <span className="mt-1 text-center text-base font-semibold text-gray-900 sm:mt-2 sm:text-xl">
                                         {formatCurrency(
                                             categoryTotal,
                                             true
