@@ -4,6 +4,7 @@ import {
     Routes,
     Route,
 } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 
 import { supabase } from "./lib/supabase";
 
@@ -103,59 +104,63 @@ function App() {
 
 function AuthenticatedApp() {
     return (
-        <BrowserRouter>
+        <MotionConfig reducedMotion="user">
 
-            <Routes>
+            <BrowserRouter>
 
-                <Route element={<AppLayout />}>
+                <Routes>
 
-                    <Route
-                        path="/"
-                        element={
-                            <Dashboard />
-                        }
-                    />
+                    <Route element={<AppLayout />}>
 
-                    <Route
-                        path="/transactions"
-                        element={
-                            <Transactions />
-                        }
-                    />
+                        <Route
+                            path="/"
+                            element={
+                                <Dashboard />
+                            }
+                        />
 
-                    <Route
-                        path="/budgets"
-                        element={
-                            <Budgets />
-                        }
-                    />
+                        <Route
+                            path="/transactions"
+                            element={
+                                <Transactions />
+                            }
+                        />
 
-                    <Route
-                        path="/goals"
-                        element={
-                            <Goals />
-                        }
-                    />
+                        <Route
+                            path="/budgets"
+                            element={
+                                <Budgets />
+                            }
+                        />
 
-                    <Route
-                        path="/analytics"
-                        element={
-                            <Analytics />
-                        }
-                    />
+                        <Route
+                            path="/goals"
+                            element={
+                                <Goals />
+                            }
+                        />
 
-                    <Route
-                        path="/settings"
-                        element={
-                            <Settings />
-                        }
-                    />
+                        <Route
+                            path="/analytics"
+                            element={
+                                <Analytics />
+                            }
+                        />
 
-                </Route>
+                        <Route
+                            path="/settings"
+                            element={
+                                <Settings />
+                            }
+                        />
 
-            </Routes>
+                    </Route>
 
-        </BrowserRouter>
+                </Routes>
+
+            </BrowserRouter>
+
+        </MotionConfig>
     );
 }
 

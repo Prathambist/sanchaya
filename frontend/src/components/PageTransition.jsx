@@ -11,6 +11,8 @@ import {
     useRef,
 } from "react";
 
+import { springs } from "../lib/motion";
+
 
 const routeOrder = {
     "/": 0,
@@ -77,12 +79,7 @@ const pageVariants = {
 };
 
 
-const pageTransition = {
-    type: "spring",
-    stiffness: 240,
-    damping: 28,
-    mass: 0.72,
-};
+const pageTransition = springs.page;
 
 
 function PageTransition({
@@ -133,7 +130,7 @@ function PageTransition({
 
             <AnimatePresence
                 initial={false}
-                mode="sync"
+                mode="popLayout"
             >
 
                 <motion.div

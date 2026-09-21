@@ -1,23 +1,6 @@
 import { motion } from "framer-motion";
 
-
-const variants = {
-    hidden: {
-        opacity: 0,
-        y: 18,
-    },
-
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            type: "spring",
-            stiffness: 300,
-            damping: 26,
-            mass: 0.7,
-        },
-    },
-};
+import { fadeUpVariants } from "../lib/motion";
 
 
 function PageSection({
@@ -27,7 +10,7 @@ function PageSection({
 }) {
     return (
         <motion.div
-            variants={variants}
+            variants={fadeUpVariants}
             initial="hidden"
             animate="visible"
             transition={{

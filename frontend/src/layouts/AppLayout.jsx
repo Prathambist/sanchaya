@@ -21,7 +21,126 @@ import {
 
 import { supabase } from "../lib/supabase";
 
+import { springs } from "../lib/motion";
+
 import PageTransition from "../components/PageTransition";
+
+
+/*
+ * Shared by every sidebar link (the mapped workspace routes and the
+ * standalone Settings link) so the active-surface, hover-surface and
+ * icon animations only need to be defined once.
+ */
+function NavItem({
+    to,
+    end,
+    icon: Icon,
+    label,
+}) {
+    return (
+        <NavLink
+            to={to}
+            end={end}
+            className="group relative block rounded-lg px-3 py-3 text-sm outline-none"
+        >
+
+            {({
+                isActive,
+            }) => (
+                <>
+
+                    {/* Sliding active surface */}
+
+                    {isActive && (
+                        <motion.div
+                            layoutId="smartbudget-active-nav"
+                            className="absolute inset-0 rounded-lg bg-neutral-100"
+                            transition={
+                                springs.nav
+                            }
+                        />
+                    )}
+
+
+                    {/* Hover surface */}
+
+                    {!isActive && (
+                        <motion.div
+                            className="absolute inset-0 rounded-lg bg-neutral-50"
+                            initial={{
+                                opacity: 0,
+                            }}
+                            whileHover={{
+                                opacity: 1,
+                            }}
+                            transition={{
+                                duration: 0.15,
+                            }}
+                        />
+                    )}
+
+
+                    {/* Icon + label */}
+
+                    <motion.div
+                        className={[
+                            "relative z-10 flex items-center gap-3",
+                            isActive
+                                ? "font-medium text-neutral-900"
+                                : "text-neutral-500",
+                        ].join(
+                            " "
+                        )}
+                        whileHover={{
+                            x: 2,
+                        }}
+                        whileTap={{
+                            scale: 0.98,
+                        }}
+                        transition={
+                            springs.snappy
+                        }
+                    >
+
+                        <motion.div
+                            animate={{
+                                scale: isActive
+                                    ? 1.08
+                                    : 1,
+                            }}
+                            transition={
+                                springs.smooth
+                            }
+                        >
+
+                            <Icon
+                                size={
+                                    18
+                                }
+                                strokeWidth={
+                                    isActive
+                                        ? 2
+                                        : 1.8
+                                }
+                            />
+
+                        </motion.div>
+
+
+                        <span>
+                            {
+                                label
+                            }
+                        </span>
+
+                    </motion.div>
+
+                </>
+            )}
+
+        </NavLink>
+    );
+}
 
 
 function AppLayout() {
@@ -118,11 +237,9 @@ function AppLayout() {
                             whileTap={{
                                 scale: 0.94,
                             }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 500,
-                                damping: 25,
-                            }}
+                            transition={
+                                springs.snappy
+                            }
                             className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-900 text-sm font-semibold text-white"
                         >
                             S
@@ -151,10 +268,9 @@ function AppLayout() {
                                 ({
                                     label,
                                     path,
-                                    icon: Icon,
+                                    icon,
                                 }) => (
-
-                                    <NavLink
+                                    <NavItem
                                         key={
                                             path
                                         }
@@ -165,111 +281,13 @@ function AppLayout() {
                                             path ===
                                             "/"
                                         }
-                                        className="group relative block rounded-lg px-3 py-3 text-sm outline-none"
-                                    >
-
-                                        {({
-                                            isActive,
-                                        }) => (
-                                            <>
-
-                                                {/* Sliding active surface */}
-
-                                                {isActive && (
-                                                    <motion.div
-                                                        layoutId="smartbudget-active-nav"
-                                                        className="absolute inset-0 rounded-lg bg-neutral-100"
-                                                        transition={{
-                                                            type: "spring",
-                                                            stiffness: 480,
-                                                            damping: 34,
-                                                            mass: 0.55,
-                                                        }}
-                                                    />
-                                                )}
-
-
-                                                {/* Hover surface */}
-
-                                                {!isActive && (
-                                                    <motion.div
-                                                        className="absolute inset-0 rounded-lg bg-neutral-50"
-                                                        initial={{
-                                                            opacity: 0,
-                                                        }}
-                                                        whileHover={{
-                                                            opacity: 1,
-                                                        }}
-                                                        transition={{
-                                                            duration: 0.15,
-                                                        }}
-                                                    />
-                                                )}
-
-
-                                                {/* Icon + label */}
-
-                                                <motion.div
-                                                    className={[
-                                                        "relative z-10 flex items-center gap-3",
-                                                        isActive
-                                                            ? "font-medium text-neutral-900"
-                                                            : "text-neutral-500",
-                                                    ].join(
-                                                        " "
-                                                    )}
-                                                    whileHover={{
-                                                        x: 2,
-                                                    }}
-                                                    whileTap={{
-                                                        scale: 0.98,
-                                                    }}
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 500,
-                                                        damping: 30,
-                                                    }}
-                                                >
-
-                                                    <motion.div
-                                                        animate={{
-                                                            scale: isActive
-                                                                ? 1
-                                                                : 1,
-                                                        }}
-                                                        transition={{
-                                                            type: "spring",
-                                                            stiffness: 450,
-                                                            damping: 28,
-                                                        }}
-                                                    >
-
-                                                        <Icon
-                                                            size={
-                                                                18
-                                                            }
-                                                            strokeWidth={
-                                                                isActive
-                                                                    ? 2
-                                                                    : 1.8
-                                                            }
-                                                        />
-
-                                                    </motion.div>
-
-
-                                                    <span>
-                                                        {
-                                                            label
-                                                        }
-                                                    </span>
-
-                                                </motion.div>
-
-                                            </>
-                                        )}
-
-                                    </NavLink>
+                                        icon={
+                                            icon
+                                        }
+                                        label={
+                                            label
+                                        }
+                                    />
                                 )
                             )}
 
@@ -284,79 +302,11 @@ function AppLayout() {
 
                         {/* Settings */}
 
-                        <NavLink
+                        <NavItem
                             to="/settings"
-                            className="group relative block rounded-lg px-3 py-3 text-sm outline-none"
-                        >
-
-                            {({
-                                isActive,
-                            }) => (
-                                <>
-
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="smartbudget-active-nav"
-                                            className="absolute inset-0 rounded-lg bg-neutral-100"
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 480,
-                                                damping: 34,
-                                                mass: 0.55,
-                                            }}
-                                        />
-                                    )}
-
-
-                                    {!isActive && (
-                                        <motion.div
-                                            className="absolute inset-0 rounded-lg bg-neutral-50"
-                                            initial={{
-                                                opacity: 0,
-                                            }}
-                                            whileHover={{
-                                                opacity: 1,
-                                            }}
-                                        />
-                                    )}
-
-
-                                    <motion.div
-                                        className={[
-                                            "relative z-10 flex items-center gap-3",
-                                            isActive
-                                                ? "font-medium text-neutral-900"
-                                                : "text-neutral-500",
-                                        ].join(
-                                            " "
-                                        )}
-                                        whileHover={{
-                                            x: 2,
-                                        }}
-                                        whileTap={{
-                                            scale: 0.98,
-                                        }}
-                                    >
-
-                                        <Settings
-                                            size={18}
-                                            strokeWidth={
-                                                isActive
-                                                    ? 2
-                                                    : 1.8
-                                            }
-                                        />
-
-                                        <span>
-                                            Settings
-                                        </span>
-
-                                    </motion.div>
-
-                                </>
-                            )}
-
-                        </NavLink>
+                            icon={Settings}
+                            label="Settings"
+                        />
 
 
                         {/* Sign out */}
@@ -372,11 +322,9 @@ function AppLayout() {
                             whileTap={{
                                 scale: 0.98,
                             }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 500,
-                                damping: 30,
-                            }}
+                            transition={
+                                springs.snappy
+                            }
                             className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800"
                         >
 
@@ -436,11 +384,9 @@ function AppLayout() {
                             whileHover={{
                                 scale: 1.06,
                             }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 450,
-                                damping: 25,
-                            }}
+                            transition={
+                                springs.smooth
+                            }
                             className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-600"
                         >
                             {

@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 
+import { fadeUpVariants } from "../lib/motion";
+
 
 const containerVariants = {
     hidden: {},
@@ -8,25 +10,6 @@ const containerVariants = {
         transition: {
             staggerChildren: 0.075,
             delayChildren: 0.12,
-        },
-    },
-};
-
-
-const itemVariants = {
-    hidden: {
-        opacity: 0,
-        y: 18,
-    },
-
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            type: "spring",
-            stiffness: 320,
-            damping: 27,
-            mass: 0.7,
         },
     },
 };
@@ -57,7 +40,7 @@ export function PageItem({
     return (
         <motion.div
             variants={
-                itemVariants
+                fadeUpVariants
             }
             className={className}
         >
