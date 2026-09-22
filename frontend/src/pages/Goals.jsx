@@ -8,6 +8,7 @@ import {
     Check,
     X,
     CircleDollarSign,
+    TrendingUp,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -16,6 +17,7 @@ import {
     useCurrency,
 } from "../context/CurrencyContext";
 import { useToast } from "../context/ToastContext";
+import { projectGoalCompletion } from "../lib/insights";
 
 
 function Goals() {
@@ -1258,6 +1260,87 @@ function Goals() {
                                         </div>
 
                                     </div>
+
+
+                                    {!goal.completed &&
+                                        (() => {
+                                            const forecast =
+                                                projectGoalCompletion(
+                                                    goal
+                                                );
+
+                                            if (
+                                                forecast.status ===
+                                                "no-progress"
+                                            ) {
+                                                return (
+                                                    <div className="mt-4 flex items-start gap-2 rounded-lg bg-neutral-50 px-3.5 py-3 text-xs text-neutral-500">
+                                                        <TrendingUp
+                                                            size={14}
+                                                            className="mt-0.5 shrink-0"
+                                                        />
+                                                        We'll show a completion forecast once this goal has a couple weeks of history.
+                                                    </div>
+                                                );
+                                            }
+
+                                            const projectedLabel =
+                                                forecast.projectedDate.toLocaleDateString(
+                                                    "en-US",
+                                                    {
+                                                        month: "short",
+                                                        day: "numeric",
+                                                        year: "numeric",
+                                                    }
+                                                );
+
+                                            if (
+                                                forecast.status ===
+                                                "behind"
+                                            ) {
+                                                return (
+                                                    <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 px-3.5 py-3 text-xs text-amber-800">
+                                                        <TrendingUp
+                                                            size={14}
+                                                            className="mt-0.5 shrink-0"
+                                                        />
+                                                        <span>
+                                                            At your current pace you'll reach this goal around{" "}
+                                                            <strong className="font-semibold">
+                                                                {projectedLabel}
+                                                            </strong>
+                                                            {" "}— after your deadline. Add{" "}
+                                                            <strong className="font-semibold">
+                                                                {formatCurrency(
+                                                                    forecast.suggestedMonthlyTopUp
+                                                                )}
+                                                                /mo
+                                                            </strong>{" "}
+                                                            more to make it in time.
+                                                        </span>
+                                                    </div>
+                                                );
+                                            }
+
+                                            return (
+                                                <div className="mt-4 flex items-start gap-2 rounded-lg bg-emerald-50 px-3.5 py-3 text-xs text-emerald-800">
+                                                    <TrendingUp
+                                                        size={14}
+                                                        className="mt-0.5 shrink-0"
+                                                    />
+                                                    <span>
+                                                        At your current pace you'll reach this goal around{" "}
+                                                        <strong className="font-semibold">
+                                                            {projectedLabel}
+                                                        </strong>
+                                                        {forecast.status ===
+                                                        "ahead"
+                                                            ? " — ahead of your deadline."
+                                                            : "."}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })()}
 
                                 </div>
                             );

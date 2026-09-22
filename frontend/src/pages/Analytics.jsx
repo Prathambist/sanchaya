@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
+import SpendingHeatmap from "../components/SpendingHeatmap";
 
 
 function formatCurrency(amount, compact = false) {
@@ -100,6 +101,7 @@ function InsightIcon({ type }) {
 
 function Analytics() {
     const [analytics, setAnalytics] = useState(null);
+    const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -114,11 +116,19 @@ function Analytics() {
             setLoading(true);
             setError("");
 
-            const data = await apiFetch(
-                "/api/analytics/summary"
-            );
+            const [analyticsData, transactionsData] =
+                await Promise.all([
+                    apiFetch("/api/analytics/summary"),
+                    // Powers the spending heatmap, which needs full
+                    // day-by-day history rather than the pre-aggregated
+                    // summary above.
+                    apiFetch("/api/transactions/"),
+                ]);
 
-            setAnalytics(data);
+            setAnalytics(analyticsData);
+            setTransactions(
+                transactionsData.transactions || []
+            );
         } catch (err) {
             setError(
                 err.message ||
@@ -816,6 +826,33 @@ function Analytics() {
                 </section>
 
             </div>
+
+
+            {/* =====================================================
+                SPENDING HEATMAP
+            ===================================================== */}
+
+            <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
+
+                <div>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                        Spending activity
+                    </h2>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                        Every expense day over the last six months, darker means you spent more.
+                    </p>
+                </div>
+
+
+                <div className="mt-6">
+                    <SpendingHeatmap
+                        transactions={transactions}
+                        formatCurrency={formatCurrency}
+                    />
+                </div>
+
+            </section>
 
 
             {/* =====================================================

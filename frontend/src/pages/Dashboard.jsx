@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
     ArrowDownLeft,
     ArrowUpRight,
+    Repeat,
     Wallet,
 } from "lucide-react";
 
@@ -9,6 +10,27 @@ import { apiFetch } from "../lib/api";
 import {
     useCurrency,
 } from "../context/CurrencyContext";
+import {
+    computeHealthScore,
+    detectRecurringExpenses,
+    healthScoreTier,
+} from "../lib/insights";
+
+
+const tierColors = {
+    emerald: "#10b981",
+    amber: "#f59e0b",
+    red: "#ef4444",
+    neutral: "#a3a3a3",
+};
+
+
+const tierTextClasses = {
+    emerald: "text-emerald-600",
+    amber: "text-amber-600",
+    red: "text-red-600",
+    neutral: "text-neutral-500",
+};
 
 
 function Dashboard() {
@@ -19,6 +41,8 @@ function Dashboard() {
 
 
     const [summary, setSummary] = useState(null);
+    const [analytics, setAnalytics] = useState(null);
+    const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -28,11 +52,25 @@ function Dashboard() {
             try {
                 setLoading(true);
 
-                const data = await apiFetch(
-                    "/api/dashboard/summary"
-                );
+                const [
+                    summaryData,
+                    analyticsData,
+                    transactionsData,
+                ] = await Promise.all([
+                    apiFetch("/api/dashboard/summary"),
+                    // Feeds the health score (savings rate, budget
+                    // adherence, goal progress all live here already).
+                    apiFetch("/api/analytics/summary"),
+                    // Feeds the subscription radar, which needs raw
+                    // transaction history rather than an aggregate.
+                    apiFetch("/api/transactions/"),
+                ]);
 
-                setSummary(data);
+                setSummary(summaryData);
+                setAnalytics(analyticsData);
+                setTransactions(
+                    transactionsData.transactions || []
+                );
             } catch (error) {
                 console.error(error);
 
@@ -160,6 +198,28 @@ function Dashboard() {
 
         return maximum;
     }, [monthlyChartData]);
+
+
+    const healthScore = useMemo(() => {
+        if (!analytics) {
+            return null;
+        }
+
+        return computeHealthScore({
+            savingsRate: Number(
+                analytics.summary?.savings_rate ?? 0
+            ),
+            budgetPerformance:
+                analytics.budget_performance || [],
+            goals: analytics.goals?.items || [],
+        });
+    }, [analytics]);
+
+
+    const recurringExpenses = useMemo(
+        () => detectRecurringExpenses(transactions),
+        [transactions]
+    );
 
 
     if (loading) {
@@ -368,6 +428,224 @@ function Dashboard() {
                     <p className="mt-2 text-sm text-neutral-400">
                         All recorded expenses
                     </p>
+
+                </div>
+
+            </section>
+
+
+            {/* Financial health score + recurring spend */}
+
+            <section className="grid gap-5 lg:grid-cols-5">
+
+                {/* Health score */}
+
+                <div className="rounded-xl border border-neutral-200 bg-white p-6 sm:p-7 lg:col-span-2">
+
+                    <h2 className="text-base font-semibold text-neutral-900">
+                        Financial health score
+                    </h2>
+
+                    <p className="mt-1.5 text-sm text-neutral-400">
+                        Blends your savings rate, budget adherence, and goal progress.
+                    </p>
+
+
+                    {healthScore ? (
+                        <>
+                            <div className="mt-7 flex items-center justify-center">
+
+                                <div
+                                    className="relative flex h-32 w-32 items-center justify-center rounded-full"
+                                    style={{
+                                        background: `conic-gradient(${
+                                            tierColors[
+                                                healthScoreTier(
+                                                    healthScore.score
+                                                ).color
+                                            ]
+                                        } ${
+                                            healthScore.score * 3.6
+                                        }deg, #f3f4f6 0deg)`,
+                                    }}
+                                >
+
+                                    <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-white">
+
+                                        <span className="text-2xl font-semibold text-neutral-900">
+                                            {healthScore.score}
+                                        </span>
+
+                                        <span className="text-[10px] text-neutral-400">
+                                            / 100
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <p
+                                className={[
+                                    "mt-4 text-center text-sm font-medium",
+                                    tierTextClasses[
+                                        healthScoreTier(
+                                            healthScore.score
+                                        ).color
+                                    ],
+                                ].join(" ")}
+                            >
+                                {
+                                    healthScoreTier(
+                                        healthScore.score
+                                    ).label
+                                }
+                            </p>
+
+
+                            <div className="mt-6 space-y-3.5">
+
+                                {healthScore.components.map(
+                                    (component) => (
+                                        <div key={component.key}>
+
+                                            <div className="flex items-center justify-between text-xs">
+
+                                                <span className="text-neutral-500">
+                                                    {component.label}
+                                                </span>
+
+                                                <span className="font-medium text-neutral-700">
+                                                    {Math.round(
+                                                        component.score
+                                                    )}
+                                                </span>
+
+                                            </div>
+
+
+                                            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+
+                                                <div
+                                                    className="h-full rounded-full bg-neutral-900"
+                                                    style={{
+                                                        width: `${component.score}%`,
+                                                    }}
+                                                />
+
+                                            </div>
+
+                                        </div>
+                                    )
+                                )}
+
+                            </div>
+                        </>
+                    ) : (
+                        <div className="mt-6 flex min-h-40 items-center justify-center px-4 text-center text-sm text-neutral-400">
+                            Add some income, a budget, or a goal to see your score.
+                        </div>
+                    )}
+
+                </div>
+
+
+                {/* Subscription radar */}
+
+                <div className="rounded-xl border border-neutral-200 bg-white p-6 sm:p-7 lg:col-span-3">
+
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+
+                        <div>
+
+                            <h2 className="text-base font-semibold text-neutral-900">
+                                Recurring spend
+                            </h2>
+
+                            <p className="mt-1.5 text-sm text-neutral-400">
+                                Payments repeating with a consistent amount, detected from your history.
+                            </p>
+
+                        </div>
+
+
+                        {recurringExpenses.items.length > 0 && (
+                            <div className="shrink-0 text-right">
+
+                                <p className="text-xl font-semibold text-neutral-900">
+                                    {formatCurrency(
+                                        recurringExpenses.totalMonthly
+                                    )}
+                                </p>
+
+                                <p className="text-xs text-neutral-400">
+                                    per month
+                                </p>
+
+                            </div>
+                        )}
+
+                    </div>
+
+
+                    {recurringExpenses.items.length ? (
+
+                        <div className="mt-6 divide-y divide-neutral-100">
+
+                            {recurringExpenses.items
+                                .slice(0, 5)
+                                .map((item) => (
+                                    <div
+                                        key={item.key}
+                                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                                    >
+
+                                        <div className="flex min-w-0 items-center gap-3">
+
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-500">
+                                                <Repeat
+                                                    size={15}
+                                                    strokeWidth={1.8}
+                                                />
+                                            </div>
+
+
+                                            <div className="min-w-0">
+
+                                                <p className="truncate text-sm font-medium text-neutral-800">
+                                                    {item.label}
+                                                </p>
+
+                                                <p className="mt-0.5 text-xs text-neutral-400">
+                                                    {item.category} · seen{" "}
+                                                    {item.occurrences}×
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <p className="shrink-0 text-sm font-semibold text-neutral-700">
+                                            {formatCurrency(
+                                                item.averageAmount
+                                            )}
+                                        </p>
+
+                                    </div>
+                                ))}
+
+                        </div>
+
+                    ) : (
+
+                        <div className="mt-6 flex min-h-40 items-center justify-center px-4 text-center text-sm text-neutral-400">
+                            We'll flag recurring payments once we spot the same expense repeating for a few months.
+                        </div>
+
+                    )}
 
                 </div>
 

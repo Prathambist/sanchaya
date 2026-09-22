@@ -13,6 +13,7 @@ import {
     useCurrency,
 } from "../context/CurrencyContext";
 import { useToast } from "../context/ToastContext";
+import { suggestCategoryBudget } from "../lib/insights";
 
 
 const monthNames = [
@@ -88,18 +89,29 @@ function Budgets() {
         useState(false);
 
 
+    const [transactions, setTransactions] =
+        useState([]);
+
+
     const loadBudgets = async () => {
         try {
             setLoading(true);
             setError("");
 
-            const data =
-                await apiFetch(
-                    "/api/budgets/"
-                );
+            const [budgetsData, transactionsData] =
+                await Promise.all([
+                    apiFetch("/api/budgets/"),
+                    // Powers the "suggested amount" hint in the
+                    // add/edit form below.
+                    apiFetch("/api/transactions/"),
+                ]);
 
             setBudgets(
-                data.budgets || []
+                budgetsData.budgets || []
+            );
+
+            setTransactions(
+                transactionsData.transactions || []
             );
         } catch (error) {
             console.error(error);
@@ -117,6 +129,18 @@ function Budgets() {
     useEffect(() => {
         loadBudgets();
     }, []);
+
+
+    const suggestedAmount = useMemo(() => {
+        if (!form.category) {
+            return null;
+        }
+
+        return suggestCategoryBudget(
+            transactions,
+            form.category
+        );
+    }, [transactions, form.category]);
 
 
     const filteredBudgets = useMemo(
@@ -895,6 +919,33 @@ function Budgets() {
                                     placeholder="Enter budget amount"
                                     className="w-full rounded-lg border border-neutral-200 px-3 py-2.5 text-sm outline-none"
                                 />
+
+
+                                {suggestedAmount !== null && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setForm({
+                                                ...form,
+                                                amount:
+                                                    convertFromBase(
+                                                        suggestedAmount
+                                                    ).toFixed(2),
+                                            })
+                                        }
+                                        className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-600 hover:bg-neutral-100"
+                                    >
+                                        Based on your last 3 months:{" "}
+                                        <strong className="font-semibold text-neutral-800">
+                                            {formatCurrency(
+                                                suggestedAmount
+                                            )}
+                                        </strong>
+                                        <span className="text-neutral-400">
+                                            · Use this
+                                        </span>
+                                    </button>
+                                )}
 
                             </div>
 
