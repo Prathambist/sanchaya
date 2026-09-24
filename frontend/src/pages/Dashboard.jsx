@@ -15,6 +15,9 @@ import {
     detectRecurringExpenses,
     healthScoreTier,
 } from "../lib/insights";
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import PageLoader from "../components/PageLoader";
+import Reveal from "../components/Reveal";
 
 
 const tierColors = {
@@ -222,42 +225,20 @@ function Dashboard() {
     );
 
 
-    if (loading) {
+    const showLoader =
+        useMinimumLoading(loading);
+
+
+    if (showLoader) {
         return (
-            <div className="space-y-9">
-
-                <div>
-
-                    <div className="h-4 w-24 animate-pulse rounded bg-neutral-200" />
-
-                    <div className="mt-3 h-10 w-40 animate-pulse rounded bg-neutral-200" />
-
-                    <div className="mt-3 h-5 w-72 animate-pulse rounded bg-neutral-100" />
-
-                </div>
-
-
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
-                    {Array.from({
-                        length: 3,
-                    }).map((_, index) => (
-                        <div
-                            key={index}
-                            className="h-36 animate-pulse rounded-xl border border-neutral-200 bg-white"
-                        />
-                    ))}
-
-                </div>
-
-            </div>
+            <PageLoader label="Preparing your dashboard" />
         );
     }
 
 
     if (error) {
         return (
-            <div className="space-y-9">
+            <Reveal className="space-y-9">
 
                 <div>
 
@@ -284,13 +265,13 @@ function Dashboard() {
 
                 </div>
 
-            </div>
+            </Reveal>
         );
     }
 
 
     return (
-        <div className="space-y-9">
+        <Reveal className="space-y-9">
 
             {/* Header */}
 
@@ -1335,7 +1316,7 @@ function Dashboard() {
 
             </section>
 
-        </div>
+        </Reveal>
     );
 }
 

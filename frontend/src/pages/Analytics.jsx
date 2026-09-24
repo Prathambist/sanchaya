@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
 import SpendingHeatmap from "../components/SpendingHeatmap";
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import PageLoader from "../components/PageLoader";
+import Reveal from "../components/Reveal";
 
 
 function formatCurrency(amount, compact = false) {
@@ -174,33 +177,22 @@ function Analytics() {
     }, [analytics]);
 
 
-    if (loading) {
+    const showLoader =
+        useMinimumLoading(loading);
+
+
+    // `|| loading` also covers the "Try again" retry below: the whole
+    // page depends on this one payload, so it shouldn't render empty.
+    if (showLoader || loading) {
         return (
-            <div className="p-8">
-                <div className="animate-pulse">
-                    <div className="h-7 w-32 rounded bg-gray-200" />
-
-                    <div className="mt-3 h-4 w-96 max-w-full rounded bg-gray-200" />
-
-                    <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-                        {[1, 2, 3, 4].map((item) => (
-                            <div
-                                key={item}
-                                className="h-32 rounded-lg border border-gray-200 bg-white"
-                            />
-                        ))}
-                    </div>
-
-                    <div className="mt-8 h-96 rounded-lg border border-gray-200 bg-white" />
-                </div>
-            </div>
+            <PageLoader label="Crunching your analytics" />
         );
     }
 
 
     if (error) {
         return (
-            <div className="p-8">
+            <Reveal className="p-8">
                 <h1 className="text-2xl font-semibold text-gray-900">
                     Analytics
                 </h1>
@@ -218,7 +210,7 @@ function Analytics() {
                         Try again
                     </button>
                 </div>
-            </div>
+            </Reveal>
         );
     }
 
@@ -258,7 +250,7 @@ function Analytics() {
 
 
     return (
-        <div className="min-h-full bg-gray-50 p-6 md:p-8">
+        <Reveal className="min-h-full bg-gray-50 p-6 md:p-8">
 
             {/* =====================================================
                 HEADER
@@ -1769,7 +1761,7 @@ function Analytics() {
 
             </div>
 
-        </div>
+        </Reveal>
     );
 }
 

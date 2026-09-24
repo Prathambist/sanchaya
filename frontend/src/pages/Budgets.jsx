@@ -14,6 +14,9 @@ import {
 } from "../context/CurrencyContext";
 import { useToast } from "../context/ToastContext";
 import { suggestCategoryBudget } from "../lib/insights";
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import PageLoader from "../components/PageLoader";
+import Reveal from "../components/Reveal";
 
 
 const monthNames = [
@@ -395,8 +398,19 @@ function Budgets() {
     );
 
 
+    const showLoader =
+        useMinimumLoading(loading);
+
+
+    if (showLoader) {
+        return (
+            <PageLoader label="Loading your budgets" />
+        );
+    }
+
+
     return (
-        <div className="space-y-7">
+        <Reveal className="space-y-7">
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
@@ -1052,7 +1066,7 @@ function Budgets() {
                 </div>
             )}
 
-        </div>
+        </Reveal>
     );
 }
 

@@ -35,7 +35,16 @@ function getRouteIndex(pathname) {
 /*
  * The entire page moves according to the
  * position of that page in the sidebar.
+ *
+ * `filter: none` once the entrance settles matters: any other filter
+ * value (even blur(0px)) makes this wrapper the containing block for
+ * position:fixed descendants, which would pin the pages' modals to the
+ * page instead of the viewport.
  */
+const settledFilter = {
+    filter: "none",
+};
+
 const pageVariants = {
     forward: {
         initial: {
@@ -48,6 +57,7 @@ const pageVariants = {
             opacity: 1,
             y: 0,
             filter: "blur(0px)",
+            transitionEnd: settledFilter,
         },
 
         exit: {
@@ -68,6 +78,7 @@ const pageVariants = {
             opacity: 1,
             y: 0,
             filter: "blur(0px)",
+            transitionEnd: settledFilter,
         },
 
         exit: {
@@ -149,7 +160,7 @@ function PageTransition({
                     transition={
                         pageTransition
                     }
-                    className="w-full will-change-transform"
+                    className="w-full"
                     style={{
                         backfaceVisibility:
                             "hidden",

@@ -18,6 +18,9 @@ import {
 } from "../context/CurrencyContext";
 import { useToast } from "../context/ToastContext";
 import { projectGoalCompletion } from "../lib/insights";
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import PageLoader from "../components/PageLoader";
+import Reveal from "../components/Reveal";
 
 
 function Goals() {
@@ -853,8 +856,19 @@ function Goals() {
             : 0;
 
 
+    const showLoader =
+        useMinimumLoading(loadingGoals);
+
+
+    if (showLoader) {
+        return (
+            <PageLoader label="Loading your goals" />
+        );
+    }
+
+
     return (
-        <div className="space-y-8">
+        <Reveal className="space-y-8">
 
             {/* Header */}
 
@@ -1965,7 +1979,7 @@ function Goals() {
                 </div>
             )}
 
-        </div>
+        </Reveal>
     );
 }
 

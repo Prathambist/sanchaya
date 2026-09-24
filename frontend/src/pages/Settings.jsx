@@ -14,6 +14,9 @@ import { supabase } from "../lib/supabase";
 import {
     useCurrency,
 } from "../context/CurrencyContext";
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import PageLoader from "../components/PageLoader";
+import Reveal from "../components/Reveal";
 
 
 function Settings() {
@@ -411,37 +414,19 @@ function Settings() {
             .toUpperCase();
 
 
-    if (loadingUser) {
+    const showLoader =
+        useMinimumLoading(loadingUser);
+
+
+    if (showLoader) {
         return (
-            <div className="space-y-7">
-
-                <div>
-                    <div className="h-4 w-20 animate-pulse rounded bg-neutral-200" />
-
-                    <div className="mt-3 h-9 w-36 animate-pulse rounded bg-neutral-200" />
-
-                    <div className="mt-2 h-4 w-72 animate-pulse rounded bg-neutral-100" />
-                </div>
-
-
-                <div className="space-y-5">
-                    {[1, 2, 3, 4].map(
-                        (item) => (
-                            <div
-                                key={item}
-                                className="h-52 animate-pulse rounded-xl border border-neutral-200 bg-white"
-                            />
-                        )
-                    )}
-                </div>
-
-            </div>
+            <PageLoader label="Loading your settings" />
         );
     }
 
 
     return (
-        <div className="space-y-8">
+        <Reveal className="space-y-8">
 
             {/* Header */}
 
@@ -1053,7 +1038,7 @@ function Settings() {
 
             </section>
 
-        </div>
+        </Reveal>
     );
 }
 

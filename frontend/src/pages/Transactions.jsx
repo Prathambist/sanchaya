@@ -16,6 +16,9 @@ import {
     useCurrency,
 } from "../context/CurrencyContext";
 import { useToast } from "../context/ToastContext";
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import PageLoader from "../components/PageLoader";
+import Reveal from "../components/Reveal";
 
 
 function Transactions() {
@@ -513,8 +516,19 @@ function Transactions() {
     };
 
 
+    const showLoader =
+        useMinimumLoading(loadingTransactions);
+
+
+    if (showLoader) {
+        return (
+            <PageLoader label="Loading your transactions" />
+        );
+    }
+
+
     return (
-        <div className="space-y-8">
+        <Reveal className="space-y-8">
 
             {/* Header */}
 
@@ -1382,7 +1396,7 @@ function Transactions() {
                 </div>
             )}
 
-        </div>
+        </Reveal>
     );
 }
 
